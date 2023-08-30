@@ -7,7 +7,7 @@ use tracing::{error, info};
 
 use crate::{
     query::parser::{self, ParsedQuery},
-    repo::BranchFilter,
+    repo::BranchFilterConfig,
     state::RepositoryPool,
 };
 
@@ -85,7 +85,7 @@ fn update_branch_filters(
 
         repo_pool.update(&reporef, |_, v| {
             let effective = std::mem::take(branches).into_iter().collect();
-            let new_filter = Some(BranchFilter::Select(effective));
+            let new_filter = Some(BranchFilterConfig::Select(effective));
             if new_filter != v.branch_filter {
                 v.branch_filter = new_filter;
                 to_sync.push(reporef.clone());
