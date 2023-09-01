@@ -40,7 +40,7 @@ impl Agent {
             .await?;
         }
 
-        let context = self.answer_context(aliases, ANSWER_MODEL).await?;
+        let context = self.answer_context(aliases, "gpt-3.5-turbo-0613").await?;
         let system_prompt = prompts::answer_article_prompt(aliases, &context);
         let system_message = llm_gateway::api::Message::system(&system_prompt);
         let history = {
@@ -57,7 +57,7 @@ impl Agent {
         let mut stream = pin!(
             self.llm_gateway
                 .clone()
-                .model(ANSWER_MODEL)
+                .model("ft:gpt-3.5-turbo-0613:bloop::7tkKlNOw")
                 .chat(&messages, None)
                 .await?
         );
