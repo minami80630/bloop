@@ -148,6 +148,7 @@ pub struct FileResultData {
     repo_ref: String,
     lang: Option<String>,
     branches: String,
+    indexed: bool,
 }
 
 #[derive(Serialize, Debug)]
@@ -158,6 +159,7 @@ pub struct FileData {
     lang: Option<String>,
     contents: String,
     siblings: Vec<DirEntry>,
+    indexed: bool,
     size: usize,
     loc: usize,
     sloc: usize,
@@ -180,7 +182,7 @@ pub struct DirEntry {
 #[derive(Serialize, PartialEq, Eq, Hash, Clone, Debug)]
 enum EntryData {
     Directory,
-    File { lang: Option<String> },
+    File { lang: Option<String>, indexed: bool },
 }
 
 #[async_trait]
@@ -474,6 +476,7 @@ impl ExecuteQuery for FileReader {
                     repo_ref: f.repo_ref,
                     lang: f.lang,
                     branches: f.branches,
+                    indexed: f.indexed,
                 })
             })
             .collect::<Vec<QueryResult>>();
@@ -675,6 +678,7 @@ impl ExecuteQuery for OpenReader {
                         contents: doc.content.clone(),
                         size: doc.content.len(),
                         loc: doc.line_end_indices.len(),
+                        indexed: doc.indexed,
                         sloc: doc
                             .line_end_indices
                             .iter()
@@ -706,6 +710,7 @@ impl ExecuteQuery for OpenReader {
                             } else {
                                 EntryData::File {
                                     lang: doc.lang.clone(),
+                                    indexed: doc.indexed,
                                 }
                             },
                         });
