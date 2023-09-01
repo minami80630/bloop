@@ -8,11 +8,13 @@ use tracing::{debug, info, instrument, trace};
 use crate::{
     agent::{
         exchange::{CodeChunk, FocusedChunk, Update},
-        prompts, transcoder, Agent, ANSWER_MODEL,
+        prompts, transcoder, Agent, 
     },
     analytics::EventData,
     llm_gateway,
 };
+
+const ANSWER_MODEL: &str = "gpt-3.5-turbo-0613";
 
 impl Agent {
     #[instrument(skip(self))]
@@ -40,7 +42,7 @@ impl Agent {
             .await?;
         }
 
-        let context = self.answer_context(aliases, "gpt-3.5-turbo-0613").await?;
+        let context = self.answer_context(aliases, ANSWER_MODEL).await?;
         let system_prompt = prompts::answer_article_prompt(aliases, &context);
         let system_message = llm_gateway::api::Message::system(&system_prompt);
         let history = {
