@@ -23,7 +23,7 @@ pub mod execute;
 mod schema;
 
 pub use embedder::Embedder;
-use embedder::LocalEmbedder;
+use embedder::GgmlEmbedder;
 use schema::{create_collection, EMBEDDING_DIM};
 pub use schema::{Embedding, Payload};
 
@@ -49,7 +49,7 @@ pub enum SemanticError {
 #[derive(Clone)]
 pub struct Semantic {
     qdrant: Arc<QdrantClient>,
-    embedder: Arc<dyn Embedder>,
+    embedder: Arc<GgmlEmbedder>,
     pub(crate) config: Arc<Configuration>,
 }
 
@@ -216,15 +216,15 @@ impl Semantic {
             init_ort_dylib(dylib_dir);
         }
 
-        #[cfg(feature = "ee")]
-        let embedder: Arc<dyn Embedder> = if let Some(ref url) = config.embedding_server_url {
-            Arc::new(embedder::RemoteEmbedder::new(url.clone(), model_dir)?)
-        } else {
-            Arc::new(LocalEmbedder::new(model_dir)?)
-        };
+        // #[cfg(feature = "ee")]
+        // let embedder: Arc<dyn Embedder> = if let Some(ref url) = config.embedding_server_url {
+        //     Arc::new(embedder::RemoteEmbedder::new(url.clone(), model_dir)?)
+        // } else {
+        //     Arc::new(LocalEmbedder::new(model_dir)?)
+        // };
 
-        #[cfg(not(feature = "ee"))]
-        let embedder: Arc<dyn Embedder> = Arc::new(LocalEmbedder::new(model_dir)?);
+        // #[cfg(not(feature = "ee"))]
+        let embedder = Arc::new(GgmlEmbedder::new(model_dir)?);
 
         Ok(Self {
             qdrant: qdrant.into(),
@@ -241,8 +241,8 @@ impl Semantic {
         &self.qdrant
     }
 
-    pub fn embedder(&self) -> &dyn Embedder {
-        self.embedder.as_ref()
+    pub fn embedder(&self) -> &GgmlEmbedder {
+        &self.embedder
     }
     pub async fn delete_collection(&self) -> anyhow::Result<()> {
         _ = self
